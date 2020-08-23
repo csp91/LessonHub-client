@@ -4,7 +4,9 @@ import Modal from './modal'
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles'
 import axios from 'axios'
 import LessonProvider from '../context/useLessonContext'
+
 import { apiWrapper } from '../api/apiWrapper'
+import postLesson from '../api/postLesson'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -17,11 +19,19 @@ const useStyles = makeStyles((theme) => ({
     },
 }))
 
+const LESSON_INIT = {
+    title: '',
+    description: '',
+    grade: 'PK',
+    email: 'john.doe@yahoo.com',
+}
+
 const AddLesson = ({ closeModal }) => {
     const classes = useStyles()
     const [file, setFile] = useState('')
     const [fileName, setFilename] = useState('Choose File')
     const [uploadedFile, setUploadedFile] = useState()
+    const [lesson, setLesson] = useState(LESSON_INIT)
 
     const fileUpload = (e) => {
         // if (e.target.files[0]) {
@@ -33,29 +43,44 @@ const AddLesson = ({ closeModal }) => {
         // }
     }
 
+    const handleChange = (e) => {
+        const { name, value } = e.target
+        setLesson(prev => {
+            return { ...prev, [name]: value }
+        })
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
-        const formData = new FormData()
-        formData.append('file', file)
 
-        try {
-            const res = await axios.post('http://localhost:8080/upload', formData, {
-                headers: {
-                    method: 'POST',
-                    'Content-Type': 'multipart/form-data',
-                    'Access-Control-Allow-Origin': 'http://localhost:3000',
+        await postLesson(lesson).then(async id => {
+            const formData = new FormData()
+            formData.append('jsondata', JSON.stringify({ name: 'cover', id: id }))
+            formData.append('file', file)
+            try {
+                const res = await axios.post('http://localhost:8080/upload', formData, {
+                    headers: {
+                        method: 'POST',
+                        'Content-Type': 'multipart/form-data',
+                        'Access-Control-Allow-Origin': 'http://localhost:3000',
+                    },
+                })
+
+                const { fileName, filePath } = res.data
+                setUploadedFile({ fileName, filePath })
+                return
+            } catch (err) {
+                if (err.response.status === 500) {
+                    console.log('server broke')
+                } else {
+                    console.log(err.response.data.msg)
                 }
-            })
-
-            const { fileName, filePath } = res.data
-            setUploadedFile({ fileName, filePath })
-        } catch (err) {
-            if (err.response.status === 500) {
-                console.log('server broke')
-            } else {
-                console.log(err.response.data.msg)
             }
-        }
+        })
+
+
+
+        closeModal()
     }
 
     return (
@@ -63,20 +88,22 @@ const AddLesson = ({ closeModal }) => {
             open={true}
             onClose={() => closeModal()}
             title='Add Lesson'
-            onSubmit={() => null}
+            // onSubmit={handleSubmit}
             mode='New'>
             <div style={{ width: '550px', height: '600px' }}>
                 <TextField
                     label="Title"
                     type="text"
-                    onChange={() => null}
+                    value={lesson.title}
+                    onChange={handleChange}
                     name="title"
                     fullWidth
                 />
                 <TextField
                     label="Description"
                     type="text"
-                    onChange={() => null}
+                    value={lesson.description}
+                    onChange={handleChange}
                     name="description"
                     fullWidth
                 />
@@ -84,8 +111,8 @@ const AddLesson = ({ closeModal }) => {
                     select
                     label="Grade Level"
                     name="grade"
-
-                    onChange={() => null}
+                    value={lesson.grade}
+                    onChange={handleChange}
                     fullWidth
                 >
                     <MenuItem value='PK'>Pre-K</MenuItem>
@@ -106,18 +133,18 @@ const AddLesson = ({ closeModal }) => {
                 </TextField>
 
                 <input
-
                     className={classes.input}
                     // style={{ display: 'none' }}
                     id="raised-button-file"
                     type="file"
+                    accept="image/*"
                     onChange={fileUpload}
                 />
-                <label htmlFor="raised-button-file">
+                {/* <label htmlFor="raised-button-file">
                     <Button variant="raised" component="span" onClick={handleSubmit}>
                         Upload
                     </Button>
-                </label>
+                </label> */}
 
 
 
@@ -169,6 +196,10 @@ const AddLesson = ({ closeModal }) => {
                     </div>
                 </div> */}
 
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '190px', float: 'right' }}>
+                <Button size='small' onClick={() => closeModal()}>Cancel</Button>
+                <Button size='small' onClick={handleSubmit}>Submit</Button>
             </div>
         </Modal >
     )

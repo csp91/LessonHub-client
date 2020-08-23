@@ -40,16 +40,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 // ]
 
 const Modal = ({ children, open, onClose, title, mode, onSubmit }) => {
-    const buttonsData = [
-        { type: 'Cancel', label: 'Cancel', color: 'default', onClick: () => onClose(), icon: <DeleteIcon /> },
-        { type: 'Delete', label: 'Delete', color: 'secondary', onClick: () => onSubmit(), icon: <DeleteIcon /> },
-        { type: 'New', label: 'Create', color: 'primary', onClick: () => onSubmit(), icon: <AddIcon /> },
-        { type: 'Copy', label: 'Copy', color: 'primary', onClick: () => onSubmit(), icon: <CopyIcon /> },
-        { type: 'View', label: 'Close', color: 'primary', onClick: () => onSubmit(), icon: <CloseIcon /> },
-        { type: 'Edit', label: 'Edit', color: 'primary', onClick: () => onSubmit(), icon: <EditIcon /> },
-        { type: 'Save', label: 'Save', color: 'primary', onClick: () => onSubmit(), icon: <SaveIcon /> },
-    ]
-
 
     return (
         <Dialog
@@ -73,11 +63,6 @@ const Modal = ({ children, open, onClose, title, mode, onSubmit }) => {
                 </div>
             </DialogTitle>
             <DialogContent>{children}</DialogContent>
-            {/* <ButtonList
-                mode={mode}
-                buttonsData={buttonsData}
-                buttonsPerMode={ModalPerMode}
-            /> */}
         </Dialog>
     )
 }

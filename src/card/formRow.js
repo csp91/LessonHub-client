@@ -98,6 +98,7 @@ const FormRow = () => {
                       <LessonCard
                         key={l.id}
                         title={l.title}
+                        id={l.id}
                         description={l.description}
                       />
                     </Grid>
