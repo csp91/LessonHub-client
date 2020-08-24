@@ -1,4 +1,4 @@
-import React, { FC, useState, ChangeEvent } from 'react'
+import React, { useState, useEffect } from 'react'
 import { TextField, MenuItem, FormControlLabel, Switch, Button, InputLabel, FormControl } from '@material-ui/core'
 import Modal from './modal'
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles'
@@ -7,6 +7,7 @@ import LessonProvider from '../context/useLessonContext'
 
 import { apiWrapper } from '../api/apiWrapper'
 import postLesson from '../api/postLesson'
+import AuthorForm from './authorForm'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -22,8 +23,14 @@ const useStyles = makeStyles((theme) => ({
 const LESSON_INIT = {
     title: '',
     description: '',
-    grade: 'PK',
-    email: 'john.doe@yahoo.com',
+    grade: '',
+    category: '',
+    email: '',
+    notes: '',
+    first: '',
+    phone: '',
+    last: '',
+
 }
 
 const AddLesson = ({ closeModal }) => {
@@ -32,11 +39,23 @@ const AddLesson = ({ closeModal }) => {
     const [fileName, setFilename] = useState('Choose File')
     const [uploadedFile, setUploadedFile] = useState()
     const [lesson, setLesson] = useState(LESSON_INIT)
+    const [authorForm, toggleAuthorForm] = useState(false)
+    const [complete, setComplete] = useState(false)
+    const [docs, setDocs] = useState([])
 
     const fileUpload = (e) => {
         // if (e.target.files[0]) {
         setFile(e.target.files[0] || '')
         setFilename(e.target.files[0]?.name || 'No file attached')
+        // } else {
+        //     setFile('')
+        //     setFilename(e.target.files[0]?.name || 'No file attached')
+        // }
+    }
+
+    const docsUpload = (e) => {
+        // if (e.target.files[0]) {
+        setDocs(prev => [...prev, ...e.target.files] || [])
         // } else {
         //     setFile('')
         //     setFilename(e.target.files[0]?.name || 'No file attached')
@@ -53,7 +72,7 @@ const AddLesson = ({ closeModal }) => {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        await postLesson(lesson).then(async id => {
+        postLesson(lesson).then(async id => {
             const formData = new FormData()
             formData.append('jsondata', JSON.stringify({ name: 'cover', id: id }))
             formData.append('file', file)
@@ -76,12 +95,19 @@ const AddLesson = ({ closeModal }) => {
                     console.log(err.response.data.msg)
                 }
             }
+            return
         })
-
-
-
+        console.log('test')
         closeModal()
     }
+
+    useEffect(() => {
+        if (lesson.title && lesson.description && lesson.category && file) {
+            setComplete(true)
+        } else {
+            setComplete(false)
+        }
+    }, [lesson, file])
 
     return (
         <Modal
@@ -98,6 +124,7 @@ const AddLesson = ({ closeModal }) => {
                     onChange={handleChange}
                     name="title"
                     fullWidth
+                    required
                 />
                 <TextField
                     label="Description"
@@ -106,6 +133,10 @@ const AddLesson = ({ closeModal }) => {
                     onChange={handleChange}
                     name="description"
                     fullWidth
+                    required
+
+
+
                 />
                 <TextField
                     select
@@ -114,93 +145,107 @@ const AddLesson = ({ closeModal }) => {
                     value={lesson.grade}
                     onChange={handleChange}
                     fullWidth
+
                 >
                     <MenuItem value='PK'>Pre-K</MenuItem>
-                    <MenuItem value='K'>K</MenuItem>
-                    <MenuItem value='1'>1</MenuItem>
-                    <MenuItem value='2'>2</MenuItem>
-                    <MenuItem value='3'>3</MenuItem>
-                    <MenuItem value='4'>4</MenuItem>
-                    <MenuItem value='5'>5</MenuItem>
-                    <MenuItem value='6'>6</MenuItem>
-                    <MenuItem value='7'>7</MenuItem>
-                    <MenuItem value='8'>8</MenuItem>
-                    <MenuItem value='9'>9</MenuItem>
-                    <MenuItem value='10'>10</MenuItem>
-                    <MenuItem value='11'>11</MenuItem>
-                    <MenuItem value='12'>12</MenuItem>
+                    <MenuItem value='K'>Kindergarten</MenuItem>
+                    <MenuItem value='1'>Grade 1</MenuItem>
+                    <MenuItem value='2'>Grade 2</MenuItem>
+                    <MenuItem value='3'>Grade 3</MenuItem>
+                    <MenuItem value='4'>Grade 4</MenuItem>
+                    <MenuItem value='5'>Grade 5</MenuItem>
+                    <MenuItem value='6'>Grade 6</MenuItem>
+                    <MenuItem value='7'>Grade 7</MenuItem>
+                    <MenuItem value='8'>Grade 8</MenuItem>
+                    <MenuItem value='9'>Grade 9</MenuItem>
+                    <MenuItem value='10'>Grade 10</MenuItem>
+                    <MenuItem value='11'>Grade 11</MenuItem>
+                    <MenuItem value='12'>Grade 12</MenuItem>
+
 
                 </TextField>
 
-                <input
-                    className={classes.input}
-                    // style={{ display: 'none' }}
-                    id="raised-button-file"
-                    type="file"
-                    accept="image/*"
-                    onChange={fileUpload}
+                <TextField
+                    select
+                    label="Category"
+                    name="category"
+                    value={lesson.category}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+
+                >
+
+                    <MenuItem value='English'>English</MenuItem>
+                    <MenuItem value='History'>History</MenuItem>
+                    <MenuItem value='Math'>Math</MenuItem>
+                    <MenuItem value='Technology'>Technology</MenuItem>
+                    <MenuItem value='Fitness'>Fitness</MenuItem>
+                    <MenuItem value='Science'>Science</MenuItem>
+                    <MenuItem value='FL'>Foreign Language</MenuItem>
+                    <MenuItem value='SS'>Social Science</MenuItem>
+
+
+                </TextField>
+
+                <TextField
+                    label="Notes"
+                    variant="outlined"
+                    type="text"
+                    value={lesson.notes}
+                    onChange={handleChange}
+                    name="notes"
+                    fullWidth
+                    rows={10}
+                    multiline
+                    style={{
+                        marginTop: '30px', height: '200px', marginBottom: '50px'
+                    }}
                 />
-                {/* <label htmlFor="raised-button-file">
-                    <Button variant="raised" component="span" onClick={handleSubmit}>
-                        Upload
-                    </Button>
-                </label> */}
+                <div style={{ display: 'flex' }}><Button
+                    variant="contained"
+                    component="label"
+                    color={file && 'primary'}
+                    style={{ marginRight: '10px' }}
+                >   <input
+                        className={classes.input}
+                        style={{ display: 'none' }}
+                        id="raised-button-file"
+                        type="file"
+                        accept="image/*"
+                        onChange={fileUpload}
+                    />
+                    Cover Page
+                </Button>{file && <div style={{ alignSelf: 'center' }}>{file.name}</div>}</div>
 
 
 
-                {/* <FormControlLabel
-                    control={
-                        <Switch checked={schedule.useAuthorized} onChange={(e, checked) => setSchedule(prev => { return { ...prev, [e.target.name]: checked } })} />
-                    }
-                    label="Authorized"
-                    name="useAuthorized"
-                />
-                <FormControl size='small' fullWidth>
-                    <InputLabel htmlFor="component-simple" shrink>Pattern</InputLabel>
-                </FormControl> */}
-                {/* <div style={{ overflow: 'auto', maxHeight: '250px' }}>
-                    <table className='pattern-table'> {schedule.patterns &&
-                        schedule.patterns.map((p: any) =>
-                            <tr key={p.step}>
-                                <td style={{ paddingRight: '10px' }}>{PATTERN_DOW(schedule.startDOW, p.step)}</td>
-                                <td><select
-                                    className='remarks-textarea'
-                                    onChange={(e) => handleDayStatus(p.step, e)}
-                                    value={p.statusId}
-                                >
-                                    {allDayStatuses &&
-                                        allDayStatuses.map((ds: DayStatus) =>
-                                            <option key={ds.id} value={ds.id}>{ds.name}</option>)}
-                                </select>
+                <div style={{ display: 'flex', marginTop: '20px' }}><Button
+                    variant="contained"
+                    component="label"
+                    color={docs.length > 0 ? 'primary' : ''}
+                    style={{ marginRight: '10px' }}
+                >   <input
+                        className={classes.input}
+                        style={{ display: 'none' }}
+                        id="raised-button-file"
+                        type="file"
+                        onChange={docsUpload}
+                    />
+                    Add a document
+                </Button></div>
+                {docs.length > 0 && docs.map(f => <div style={{ alignSelf: 'center' }}>{f.name}</div>)}
 
-                                </td>
-                            </tr>)}
-                    </table>
-                    <div style={{ paddingTop: '10px' }}>
-                        <Button
-                            size='small'
-                            variant="contained"
-                            color="primary"
-                            style={{ marginRight: '5px' }}
-                            onClick={() => {
-                                setSchedule(prev => {
-                                    const patternInit = { schedId: prev.id, step: 1, duration: '1 day', statusId: 1 }
-                                    return { ...prev, ['patterns']: prev.patterns ? [...prev.patterns, { ...patternInit, step: prev.patterns.length + 1 }] : [patternInit] }
-                                })
-                            }}>Add</Button>
-                        <Button
-                            size='small'
-                            disabled={!schedule.patterns || schedule.patterns.length == 0}
-                            variant="contained" color="secondary"
-                            onClick={() => setSchedule(prev => { return { ...prev, patterns: [] } })}>Clear All</Button>
-                    </div>
-                </div> */}
+
+
 
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '190px', float: 'right' }}>
                 <Button size='small' onClick={() => closeModal()}>Cancel</Button>
-                <Button size='small' onClick={handleSubmit}>Submit</Button>
+                <Button size='small' onClick={() => toggleAuthorForm(true)} disabled={!complete}>Next</Button>
             </div>
+
+            {authorForm && <AuthorForm closeModal={() => closeModal()} lesson={lesson} handleChange={e => handleChange(e)} handleSubmit={(e) => handleSubmit(e)} />}
         </Modal >
     )
 }

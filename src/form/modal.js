@@ -34,12 +34,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-// const ModalPerMode = [
-//     { mode: 'New', list: ['Cancel', 'New'] },
-//     { mode: 'Edit', list: ['Cancel', 'Save'] },
-// ]
-
-const Modal = ({ children, open, onClose, title, mode, onSubmit }) => {
+const Modal = ({ children, open, onClose, title, }) => {
 
     return (
         <Dialog

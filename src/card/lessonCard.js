@@ -10,6 +10,7 @@ import Typography from '@material-ui/core/Typography'
 import { Box } from '@material-ui/core'
 import Rating from '@material-ui/lab/Rating'
 import getItems from '../api/getItems'
+import ViewLesson from '../form/viewLesson'
 
 const useStyles = makeStyles({
   root: {
@@ -21,19 +22,19 @@ const useStyles = makeStyles({
   },
 })
 
-const LessonCard = ({ title, description, id }) => {
+const LessonCard = ({ lesson }) => {
   const classes = useStyles()
   const [rating, setRating] = useState(3)
   const [items, setItems] = useState([])
+  const [view, toggleView] = useState(false)
 
   useEffect(() => {
-    getItems(id).then(setItems)
-    console.log(items)
+    getItems(lesson.id).then(setItems)
   }, [])
 
   return (
     <Card className={classes.root}>
-      <CardActionArea>
+      <CardActionArea onClick={() => toggleView(!view)}>
         {/* <CardMedia
           component="img"
           alt="Contemplative Reptile"
@@ -42,15 +43,15 @@ const LessonCard = ({ title, description, id }) => {
           title="Contemplative Reptile"
 
         > */}
-        <div style={{ width: '275px', height: '186px', overflow: 'hidden' }}>{items.length > 0 && <img alt={title} src={`data:image/*;base64,${items[0].files.toString('base64')}`} />}</div>
+        <div style={{ width: '275px', height: '186px', overflow: 'hidden' }}>{items.length > 0 && <img style={{ width: '100%', objectFit: 'contain' }} alt={lesson.title} src={`data:image/*;base64,${items[0].files.toString('base64')}`} />}</div>
         {/* </CardMedia> */}
 
         <CardContent className={classes.content}>
           <Typography gutterBottom variant="h5" component="h2">
-            {title}
+            {lesson.title}
           </Typography>
           <Typography variant="body2" color="textSecondary" component="p">
-            {description}
+            {lesson.description}
           </Typography>
         </CardContent>
       </CardActionArea>
@@ -72,6 +73,8 @@ const LessonCard = ({ title, description, id }) => {
           </div>
         </div>
       </CardActions>
+
+      {view && <ViewLesson lesson={lesson} closeModal={() => toggleView(false)} ></ViewLesson>}
     </Card>
   )
 }

@@ -8,7 +8,7 @@ import { useLessonsContext } from '../context/useLessonContext'
 const useStyles = makeStyles({
   root: {
     flexGrow: 1,
-    marginTop: '100px',
+    marginTop: '150px',
   },
 })
 
@@ -94,12 +94,10 @@ const FormRow = () => {
               <Grid container item xs={12} spacing={3}>
                 <React.Fragment>
                   {lessons.slice(temp, temp + 3).map((l) => (
-                    <Grid item xs={4} style={{ marginTop: '10px' }}>
+                    <Grid item xs={4} style={{ marginTop: '10px', minWidth: '350px' }}>
                       <LessonCard
                         key={l.id}
-                        title={l.title}
-                        id={l.id}
-                        description={l.description}
+                        lesson={l}
                       />
                     </Grid>
                   ))}
